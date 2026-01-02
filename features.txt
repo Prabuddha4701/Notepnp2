@@ -1,0 +1,254 @@
+1. Core (Must-Have) Features
+
+These are non-negotiable. Without these, users will not adopt the app.
+
+Notes Management
+
+Create / edit / delete notes
+
+Folders or notebooks
+
+Rename notes
+
+Pin important notes
+
+Auto-save
+
+Text Input
+
+Typed text notes
+
+Basic formatting (bold, underline, bullet lists)
+
+Undo / redo
+
+Handwriting / Drawing
+
+Freehand drawing on canvas
+
+Pen, eraser, highlighter
+
+Stroke thickness control
+
+Color picker
+
+Undo / redo strokes
+
+Clear page
+
+Pages & Layout
+
+Multiple pages per note
+
+Infinite scroll or paged canvas
+
+Zoom & pan
+
+Page templates (blank, ruled, grid)
+
+Basic UI
+
+Clean toolbar
+
+Dark mode
+
+Tablet & phone layout support
+
+2. Storage & Sync Features
+
+These decide trust and reliability.
+
+Local Storage
+
+Offline-first design
+
+Auto save to local database (Hive / SQLite)
+
+Cloud Sync (Optional but Important)
+
+Sync across devices
+
+Login with Google / Email
+
+Backup & restore
+
+Export / Import
+
+Export as PDF
+
+Export as image
+
+Import PDF (annotate on top)
+
+3. Search & Organization (Very Important)
+Search
+
+Search typed text
+
+Search note titles
+
+Search inside handwritten text (advanced)
+
+Tags & Labels
+
+Add tags to notes
+
+Filter by tag
+
+Smart folders (e.g., “Recent”, “Important”)
+
+4. Handwriting Intelligence (Advanced & Differentiating)
+
+This is where your app becomes special.
+
+Handwriting → Text
+
+Convert handwriting to typed text
+
+Select region for conversion
+
+Multiple languages support
+
+Shape Recognition
+
+Auto-straighten lines
+
+Circles → perfect circles
+
+Squares / arrows
+
+Math & Diagrams (Advanced)
+
+Recognize math expressions
+
+Convert to LaTeX / clean format
+
+Diagram cleanup
+
+5. Stylus & Tablet-Focused Features
+
+Especially important for Samsung / iPad users.
+
+Palm rejection
+
+Pressure sensitivity
+
+Tilt support
+
+Stylus button actions
+
+Hover preview (Samsung S Pen)
+
+6. Productivity Features
+Reminders & Tasks
+
+Convert note → to-do list
+
+Set reminders
+
+Notifications
+
+Links & Media
+
+Attach images
+
+Attach audio recordings
+
+Voice notes
+
+Insert links
+
+7. AI-Powered Features (Next-Gen)
+
+These features can justify subscriptions.
+
+AI Writing Assistance
+
+Rewrite handwritten notes into clean text
+
+Summarize long notes
+
+Generate explanations
+
+RAG (Retrieval-Augmented Generation)
+
+Ask questions from your notes
+
+“Explain this chapter”
+
+“Create exam questions from this note”
+
+Smart Study Tools
+
+Flashcards from notes
+
+Quiz generation
+
+Key point extraction
+
+8. Collaboration (Optional)
+
+Share notes
+
+Real-time collaboration
+
+Commenting
+
+9. Security & Privacy (Very Important)
+
+App lock (PIN / biometrics)
+
+End-to-end encryption (advanced)
+
+Private folders
+
+10. Monetization-Friendly Features
+
+If you plan subscription:
+
+Free Tier
+
+Limited notes
+
+Basic handwriting
+
+Local storage only
+
+Premium Tier
+
+Cloud sync
+
+Handwriting recognition
+
+AI features
+
+PDF export
+
+Unlimited notes
+
+Recommended Feature Roadmap (Smart Approach)
+Phase 1 (MVP)
+
+Canvas drawing
+
+Save notes locally
+
+Multiple pages
+
+PDF export
+
+Phase 2
+
+Handwriting recognition
+
+Search
+
+Cloud sync
+
+Phase 3
+
+AI features
+
+RAG from notes
+
+Study tools

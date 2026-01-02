@@ -1,0 +1,78 @@
+  //mlkit imports
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+
+
+
+  final TextRecognizer _textRecognizer = TextRecognizer(
+    script: TextRecognitionScript.latin,
+  );
+  //recognition function
+  Future<String> recoganizeText(Uint8List imageBytes) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/temporary_img.png');
+      await file.writeAsBytes(imageBytes);
+
+      final inputImage = InputImage.fromFile(file);
+
+      final RecognizedText recoganizedText = await _textRecognizer.processImage(
+        inputImage,
+      );
+
+      return recoganizedText.text;
+    } catch (e) {
+      print("Error in text recognition: $e");
+      return "hmm";
+    }
+  }
+
+  //---------------------------------------------
+  //canvas to image function
+  Future<Uint8List?> capturePageasImage(
+    int pageIndex,
+    double pageheight,
+    double pagewidth,
+  ) async {
+    final recoder = PictureRecorder();
+    final canvas = Canvas(recoder);
+
+    //scrool for need page
+    canvas.translate(0, -(pageIndex * pageheight));
+
+    //get data from the page using custompainter
+    final painter = Notecanvas(_strokes, [], selectedColor, strokewidth);
+    painter.paint(canvas, Size(pagewidth, (pageIndex + 1) * pageheight));
+
+    //convert to image
+    final picture = recoder.endRecording();
+    final img = await picture.toImage(pagewidth.toInt(), pageheight.toInt());
+    final bytedata = await img.toByteData(format: ui.ImageByteFormat.png);
+
+    return bytedata?.buffer.asUint8List();
+  }
+
+  //---------------------------------------------
+  //final processing function
+  Future<void> processCanvas() async {
+    int _totalpages = (_canvasheight / 800).ceil();
+    double _pageWidth = MediaQuery.of(context).size.width;
+
+    for (int i = 0; i < _totalpages; i++) {
+      Uint8List? pageImage = await capturePageasImage(
+        i,
+        _canvasheight,
+        _pageWidth,
+      );
+      if (pageImage != null) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(content: Image.memory(pageImage)),
+        );
+        String recoganizedText = await recoganizeText(pageImage);
+        print("Page ${i + 1} Text: $recoganizedText");
+      }
+    }
+  }
+  //---------------------------------------------

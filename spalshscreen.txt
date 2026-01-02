@@ -1,0 +1,42 @@
+* const Splashscreen({super.key}); :- key for the widget
+
+* @override
+  void initState() {
+    super.initState();
+...}                     :-just like useEffect.run on app mount.
+
+
+* await Future.delayed(const Duration(seconds: 3),(){}); :- handle delays
+
+* dispose() :- cleanup function. used to prevrnt memory leaks.(simply dispose widget after use)
+
+              AnimationControllers (ඔයාගේ code එකේ තියෙන එක)
+
+              TextEditingControllers (අකුරු ටයිප් කරන තැන් වල තියෙන ඒවා)
+ 
+              ScrollControllers (ලැයිස්තු පාලනය කරන ඒවා)
+
+              Streams/Timers (Background එකේ දත්ත එන ඒවා) 
+
+*
+initState: කාමරයකට ඇතුළු වී ලයිට් පත්තු කරනවා වගේ (Setup).
+
+build: කාමරය ඇතුළේ වැඩ කරනවා වගේ (Render).
+
+dispose: කාමරයෙන් එළියට යනකොට ලයිට් නිවා දමනවා වගේ (Cleanup).
+
+
+* build :- a method. 
+
+Buildcontext context :- Buildcontwxt is a data type and context is the variable.
+
+                         using context, it can be performed,
+                              Navigation,Themes,Screen size
+
+*controllers :-
+                Animation controllers
+                TextEditingController: TextField
+                Scroolcontroller : ListView
+                PageController: PageView
+                VideoPlayerController:
+                Webviewcontroller

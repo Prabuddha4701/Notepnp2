@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:notepnp/Drawingscreen.dart';
+
 import 'package:notepnp/models/note.dart';
 import 'package:notepnp/models/offset.dart';
 import 'package:notepnp/models/strokes.dart';
+import 'package:notepnp/models/textnote.dart';
 import 'Spalshscreen.dart';
 import 'Home.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +17,10 @@ void main() async {
   Hive.registerAdapter(StrokeAdapter());
   Hive.registerAdapter(CustomoffsetAdapter());
   Hive.registerAdapter(DrawingNoteAdapter());
+  Hive.registerAdapter(TextNoteAdapter());
 
   await Hive.openBox<DrawingNote>('notes_box');
+  await Hive.openBox<TextNote>('text_note_box');
   runApp(MyApp());
 }
 
@@ -30,8 +36,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Spalshscreen(),
         '/home': (context) => Homescreen(),
-        '/draw': (context) => Drawingscreen(),
       },
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
     );
   }
 }

@@ -8,6 +8,8 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
 
 import 'package:hive/hive.dart';
 
+import 'package:notepnp/models/offset.dart';
+
 class Drawingscreen extends StatefulWidget {
   final DrawingNote? note;
   const Drawingscreen({super.key, this.note});
@@ -204,9 +206,10 @@ class _DrawingscreenState extends State<Drawingscreen> {
                     );
                   } else {
                     _currentpoints.add(details.localPosition);
-                    if (details.localPosition.dy > _canvasheight - 50) {
-                      _canvasheight += _canvasheight;
-                    }
+                  }
+
+                  if (details.localPosition.dy > _canvasheight - 50) {
+                    _canvasheight += _canvasheight;
                   }
                 });
               },
@@ -346,6 +349,14 @@ class _DrawingscreenState extends State<Drawingscreen> {
               });
             },
             icon: Icon(Icons.brush),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                selectedTool = Drawingtool.highliter;
+              });
+            },
+            icon: Icon(Icons.highlight),
           ),
           IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz_rounded)),
         ],

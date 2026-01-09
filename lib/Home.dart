@@ -5,6 +5,7 @@ import 'package:notepnp/Drawingscreen.dart';
 import 'package:notepnp/models/note.dart';
 import 'package:notepnp/models/textnote.dart';
 import 'package:notepnp/texteditor.dart';
+import 'package:notepnp/listview.dart';
 
 enum Tabs { handwriting, text, pdf }
 
@@ -93,7 +94,7 @@ class Homescreen extends StatelessWidget {
                         .toList();
 
                     return ListView.builder(
-                      itemCount: (box.values.length),
+                      itemCount: collections.length,
                       itemBuilder: (context, index) {
                         final collectionName = collections[index];
 
@@ -104,7 +105,16 @@ class Homescreen extends StatelessWidget {
                             leading: Icon(Icons.folder),
                             title: Text(collectionName),
                             trailing: Icon(Icons.abc_rounded),
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CollectionNotes(
+                                    collectionName: collectionName,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },

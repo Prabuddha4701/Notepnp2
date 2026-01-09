@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:notepnp/models/note.dart';
 import 'package:notepnp/models/offset.dart';
+import 'package:notepnp/models/pdf.dart';
 import 'package:notepnp/models/strokes.dart';
 import 'package:notepnp/models/textnote.dart';
 import 'Spalshscreen.dart';
@@ -18,9 +19,11 @@ void main() async {
   Hive.registerAdapter(CustomoffsetAdapter());
   Hive.registerAdapter(DrawingNoteAdapter());
   Hive.registerAdapter(TextNoteAdapter());
+  Hive.registerAdapter(PdfDocsAdapter());
 
   await Hive.openBox<DrawingNote>('notes_box');
   await Hive.openBox<TextNote>('text_note_box');
+  await Hive.openBox<PdfDocs>('pdf_box');
   runApp(MyApp());
 }
 

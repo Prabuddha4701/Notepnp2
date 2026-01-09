@@ -6,10 +6,13 @@ import 'package:notepnp/models/textnote.dart';
 
 import 'dart:convert'; // jsonEncode and jsonDecode
 import 'dart:io'; // File
-import 'package:path_provider/path_provider.dart'; // File path
+import 'package:path_provider/path_provider.dart'; // File pat
+import 'package:flutter_quill/quill_delta.dart';
 
 class TextEditorContainer extends StatefulWidget {
-  const TextEditorContainer({super.key});
+  final String? fileName;
+  final String? initialText;
+  const TextEditorContainer({super.key, this.fileName, this.initialText});
   @override
   State<TextEditorContainer> createState() => _TextEditor();
 }
@@ -25,7 +28,7 @@ class _TextEditor extends State<TextEditorContainer> {
       final directory = await getApplicationDocumentsDirectory();
       final path = directory.path;
 
-      final file = File('$path/$fileName.json');
+      final file = File('$path/$fileName');
       await file.writeAsString(jsonContent);
 
       var box = Hive.box<TextNote>('text_note_box');
@@ -99,25 +102,48 @@ class _TextEditor extends State<TextEditorContainer> {
   }
   //saving dialog box end
 
-  //loading a note function start
-  Future<void> _loadNote(String fileName) async {
-    final directory = await getApplicationCacheDirectory();
-    final file = File('$directory/$fileName.json');
+  //load a note function start
+  Future<void> _loadNote() async {
+    if (widget.fileName != null) {
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/${widget.fileName}');
 
-    if (await file.exists()) {
-      final content = await file.readAsString();
-      final jsonResponse = jsonDecode(content);
+        if (await file.exists()) {
+          final content = await file.readAsString();
+          final jsonResponse = jsonDecode(content);
 
-      setState(() {
-        _controller = QuillController(
-          document: Document.fromJson(jsonResponse),
-          selection: const TextSelection.collapsed(offset: 0),
-        );
-      });
+          setState(() {
+            _controller = QuillController(
+              document: Document.fromJson(jsonResponse),
+              selection: const TextSelection.collapsed(offset: 0),
+            );
+          });
+        }
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
   QuillController _controller = QuillController.basic();
+  @override
+  void initState() {
+    if (widget.initialText != null && widget.initialText!.isNotEmpty) {
+      String textToInsert = widget.initialText!;
+      if (!textToInsert.endsWith('\n')) {
+        textToInsert += '\n';
+      }
+      final delta = Delta()..insert(textToInsert);
+      _controller = QuillController(
+        document: Document.fromDelta(delta),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    } else {
+      _controller = QuillController.basic();
+      _loadNote();
+    }
+  }
 
   @override
   void dispose() {

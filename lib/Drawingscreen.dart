@@ -9,6 +9,7 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
 import 'package:hive/hive.dart';
 
 import 'package:notepnp/models/offset.dart';
+import 'package:notepnp/texteditor.dart';
 
 class Drawingscreen extends StatefulWidget {
   final DrawingNote? note;
@@ -113,42 +114,70 @@ class _DrawingscreenState extends State<Drawingscreen> {
   final mdir.DigitalInkRecognizer _digitalInkRecoganizer =
       mdir.DigitalInkRecognizer(languageCode: 'en-US');
   //recoganizing function
-  Future<void> recoganizrDrawing() async {
-    final ink = mdir.Ink();
+  Future<void> recoganizrDrawing(List<Stroke> allStrokes) async {
+    if (allStrokes.isNotEmpty) {
+      try {
+        final bool isModelDownloaded =
+            await mdir.DigitalInkRecognizerModelManager().isModelDownloaded(
+              'en-US',
+            );
+        if (!isModelDownloaded) {
+          await mdir.DigitalInkRecognizerModelManager().downloadModel('en-US');
+        }
 
-    for (var stroke in _strokes) {
-      final inkStroke = mdir.Stroke();
-      for (var point in stroke.points) {
-        inkStroke.points.add(
-          mdir.StrokePoint(
-            x: point.dx,
-            y: point.dy,
-            t: DateTime.now().millisecondsSinceEpoch,
-          ),
+        allStrokes.sort(
+          (a, b) => a.points.first.dy.compareTo(b.points.first.dy),
         );
-      }
-      ink.strokes.add(inkStroke);
-    }
-    try {
-      //download the model if not
-      final bool isModelDownloaded =
-          await mdir.DigitalInkRecognizerModelManager().isModelDownloaded(
-            'en-US',
-          );
-      if (!isModelDownloaded) {
-        await mdir.DigitalInkRecognizerModelManager().downloadModel('en-US');
-      }
-      //letter detection
-      final List<mdir.RecognitionCandidate> candidates =
-          await _digitalInkRecoganizer.recognize(ink);
+        List<List<Stroke>> lines = [];
+        List<Stroke> currentLine = [allStrokes[0]];
 
-      //print the top candidate
-      if (candidates.isNotEmpty) {
-        String recognizedText = candidates[0].text;
-        print('Recognized Text: $recognizedText');
-      }
-    } catch (e) {
-      print('Error during recognition: $e');
+        for (int i = 1; i < allStrokes.length; i++) {
+          if (((allStrokes[i].points.first.dy) -
+                      (currentLine.last.points.first.dy))
+                  .abs() >
+              50) {
+            lines.add(List.from(currentLine));
+            currentLine = [allStrokes[i]];
+          } else {
+            currentLine.add(allStrokes[i]);
+          }
+        }
+        lines.add(currentLine);
+        String fullText = "";
+        for (var line in lines) {
+          line.sort((a, b) => a.points.first.dx.compareTo(b.points.first.dx));
+          final ink = mdir.Ink();
+
+          for (var stroke in line) {
+            final inkStroke = mdir.Stroke();
+            for (var point in stroke.points) {
+              inkStroke.points.add(
+                mdir.StrokePoint(
+                  x: point.dx,
+                  y: point.dy,
+                  t: DateTime.now().millisecondsSinceEpoch,
+                ),
+              );
+            }
+            ink.strokes.add(inkStroke);
+          }
+          final candidates = await _digitalInkRecoganizer.recognize(ink);
+          if (candidates.isNotEmpty) {
+            fullText += candidates[0].text + " ";
+          }
+
+          print(fullText);
+          if (fullText.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    TextEditorContainer(initialText: fullText),
+              ),
+            );
+          }
+        }
+      } catch (err) {}
     }
   }
 
@@ -160,7 +189,7 @@ class _DrawingscreenState extends State<Drawingscreen> {
         actions: [
           IconButton(
             onPressed: () {
-              recoganizrDrawing();
+              recoganizrDrawing(_strokes);
             },
             icon: Icon(Icons.text_fields),
           ),

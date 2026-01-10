@@ -1,18 +1,25 @@
 import 'package:hive/hive.dart';
-import 'strokes.dart'; // ඔයාගේ Stroke class එක තියෙන file එක
 
 part 'note.g.dart';
 
 @HiveType(typeId: 2) // අංක 2 පාවිච්චි කරන්න
 class DrawingNote extends HiveObject {
   @HiveField(0)
-  String title;
+  String collection;
 
   @HiveField(1)
-  List<Stroke> strokes;
+  String title;
 
   @HiveField(2)
+  String fileName;
+
+  @HiveField(3)
   DateTime date;
 
-  DrawingNote({required this.title, required this.strokes, required this.date});
+  DrawingNote({
+    required this.collection,
+    required this.title,
+    required this.fileName,
+    required this.date,
+  });
 }

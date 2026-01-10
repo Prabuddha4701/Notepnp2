@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:notepnp/models/note.dart';
-import 'package:notepnp/models/offset.dart';
-import 'package:notepnp/models/pdf.dart';
-import 'package:notepnp/models/strokes.dart';
+
 import 'package:notepnp/models/textnote.dart';
 import 'Spalshscreen.dart';
 import 'Home.dart';
@@ -15,15 +13,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  Hive.registerAdapter(StrokeAdapter());
-  Hive.registerAdapter(CustomoffsetAdapter());
+
   Hive.registerAdapter(DrawingNoteAdapter());
   Hive.registerAdapter(TextNoteAdapter());
-  Hive.registerAdapter(PdfDocsAdapter());
 
-  await Hive.openBox<DrawingNote>('notes_box');
+  await Hive.openBox<DrawingNote>('drawing_notes_box');
   await Hive.openBox<TextNote>('text_note_box');
-  await Hive.openBox<PdfDocs>('pdf_box');
+
   runApp(MyApp());
 }
 

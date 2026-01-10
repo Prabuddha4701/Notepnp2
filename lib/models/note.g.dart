@@ -17,21 +17,24 @@ class DrawingNoteAdapter extends TypeAdapter<DrawingNote> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return DrawingNote(
-      title: fields[0] as String,
-      strokes: (fields[1] as List).cast<Stroke>(),
-      date: fields[2] as DateTime,
+      collection: fields[0] as String,
+      title: fields[1] as String,
+      fileName: fields[2] as String,
+      date: fields[3] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, DrawingNote obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.title)
+      ..write(obj.collection)
       ..writeByte(1)
-      ..write(obj.strokes)
+      ..write(obj.title)
       ..writeByte(2)
+      ..write(obj.fileName)
+      ..writeByte(3)
       ..write(obj.date);
   }
 

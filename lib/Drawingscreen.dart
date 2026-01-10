@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notepnp/models/note.dart';
@@ -8,12 +11,15 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
 
 import 'package:hive/hive.dart';
 
-import 'package:notepnp/models/offset.dart';
+//import 'package:notepnp/models/offset.dart';
 import 'package:notepnp/texteditor.dart';
+
+import 'package:path_provider/path_provider.dart';
 
 class Drawingscreen extends StatefulWidget {
   final DrawingNote? note;
-  const Drawingscreen({super.key, this.note});
+  final String? fileName;
+  const Drawingscreen({super.key, this.note, this.fileName});
   @override
   State<Drawingscreen> createState() => _DrawingscreenState();
 }
@@ -35,10 +41,10 @@ class _DrawingscreenState extends State<Drawingscreen> {
   @override
   void initState() {
     super.initState();
-
-    // Homescreen එකෙන් නෝට් එකක් ලැබිලා තියෙනවා නම් ඒකේ strokes ටික ලෝඩ් කරනවා
-    if (widget.note != null) {
-      _strokes = List.from(widget.note!.strokes);
+    if (widget.fileName != null) {
+      _loadNote();
+    } else {
+      print("_loadnote did nor run");
     }
   }
 
@@ -46,45 +52,72 @@ class _DrawingscreenState extends State<Drawingscreen> {
     super.dispose();
   }
 
-  //----------------------------------------------
-  void _saveNote(String noteTitle) {
-    if (widget.note != null) {
-      widget.note!.title = noteTitle;
-      widget.note!.strokes = List.from(_strokes);
-      widget.note!.date = DateTime.now();
-      widget.note!.save();
+  //-------------savenote start---------------------------------
+  Future<void> _saveNote(String collection, String title) async {
+    String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+    String fileName = 'canvas_${timeStamp}.json';
+    try {
+      //strokes to json
+      List<Map<String, dynamic>> strokemap = _strokes
+          .map(
+            (stroke) => {
+              'points': stroke.points
+                  .map((p) => {'x': p.dx, 'y': p.dy})
+                  .toList(),
+              'color': stroke.color.value,
+              'strokeWidth': stroke.strokeWidth,
+            },
+          )
+          .toList();
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("updated successfully!")));
-    } else {
-      var box = Hive.box<DrawingNote>('notes_box');
-      final newnote = DrawingNote(
-        title: noteTitle,
-        strokes: List.from(_strokes),
+      String JsonContent = jsonEncode(strokemap);
+
+      //folder and file
+      final directory = await getApplicationDocumentsDirectory();
+      final path = directory.path;
+      final file = File('${path}/${fileName}');
+      //write to file
+      await file.writeAsString(JsonContent);
+
+      //save to hive
+      var box = Hive.box<DrawingNote>('drawing_notes_box');
+
+      final newDrawingNote = DrawingNote(
+        collection: collection,
+        title: title,
+        fileName: fileName,
         date: DateTime.now(),
       );
-      box.add(newnote);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("saved successfully!")));
+      box.add(newDrawingNote);
+      print("Drawing note saved successfully ${fileName}");
+    } catch (err) {
+      print("Drawing note save error ${err}");
     }
   }
-  //-----------------------------------------------
+  //-----------------savenote end------------------------------
 
   //--------------notesavedialogbox----------------
   void_saveNoteDialogBox() {
-    final TextEditingController _textController = TextEditingController(
-      text: widget.note?.title ?? "",
-    );
+    final TextEditingController _collectioncontroller = TextEditingController();
+    final TextEditingController _titlecontroller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Save Your Note'),
-          content: TextField(
-            controller: _textController,
-            decoration: InputDecoration(hintText: 'Enter Note Title'),
+          title: Text('Save Your Note As'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _collectioncontroller,
+                decoration: InputDecoration(hintText: 'Enter Note Collection'),
+              ),
+
+              TextField(
+                controller: _titlecontroller,
+                decoration: InputDecoration(hintText: 'Enter Note Title'),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -95,9 +128,10 @@ class _DrawingscreenState extends State<Drawingscreen> {
             ),
             TextButton(
               onPressed: () {
-                String title = _textController.text;
+                String title = _titlecontroller.text;
+                String collection = _collectioncontroller.text;
                 if (title.isNotEmpty) {
-                  _saveNote(title);
+                  _saveNote(collection, title);
                   Navigator.of(context).pop();
                 }
               },
@@ -108,7 +142,49 @@ class _DrawingscreenState extends State<Drawingscreen> {
       },
     );
   }
-  //-----------------------------------------------
+  //-----------------notesavedialogbox end--------------------------
+
+  //-------------------load_note start-----------------------------
+  Future<void> _loadNote() async {
+    print("hello ${widget.fileName}");
+    if (widget.fileName != null) {
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/${widget.fileName}');
+
+        if (await file.exists()) {
+          final content = await file.readAsString();
+          final jsonResponse = jsonDecode(content);
+
+          setState(() {
+            _strokes = List<Stroke>.from(
+              jsonResponse.map((stroke) {
+                List<dynamic> PointsJson = stroke['points'];
+                List<Offset> StrokePoints = PointsJson.map((point) {
+                  return Offset(point['x'] as double, point['y'] as double);
+                }).toList();
+
+                Color strokeColor = Color(stroke['color'] as int);
+
+                double width = (stroke['strokeWidth'] as num).toDouble();
+
+                return Stroke(
+                  points: StrokePoints,
+                  color: strokeColor,
+                  strokeWidth: width,
+                );
+              }).toList(),
+            );
+          });
+        }
+      } catch (err) {
+        print("load err${err}");
+      }
+    } else {
+      print("load_err");
+    }
+  }
+  //------------------------loadnote end------------------------------
 
   //recoganizer
   final mdir.DigitalInkRecognizer _digitalInkRecoganizer =
@@ -247,9 +323,9 @@ class _DrawingscreenState extends State<Drawingscreen> {
                 setState(() {
                   _isdrawing = false;
                   _strokes.add(
-                    Stroke.fromDrawing(
+                    Stroke(
                       points: List.from(_currentpoints),
-                      color: selectedColor.value,
+                      color: selectedColor,
                       strokeWidth: strokewidth,
                     ),
                   );
@@ -435,13 +511,13 @@ class Notecanvas extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final stroke in strokes) {
       final paint = Paint()
-        ..color = stroke.getColor
+        ..color = stroke.color
         ..strokeWidth = stroke.strokeWidth
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
       for (int i = 0; i < stroke.points.length - 1; i++) {
-        canvas.drawLine(stroke.getPoints[i], stroke.getPoints[i + 1], paint);
+        canvas.drawLine(stroke.points[i], stroke.points[i + 1], paint);
       }
     }
 

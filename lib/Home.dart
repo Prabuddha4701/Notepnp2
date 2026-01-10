@@ -6,6 +6,7 @@ import 'package:notepnp/models/note.dart';
 import 'package:notepnp/models/textnote.dart';
 import 'package:notepnp/texteditor.dart';
 import 'package:notepnp/listview.dart';
+import 'package:notepnp/listview2.dart';
 
 enum Tabs { handwriting, text, pdf }
 
@@ -39,35 +40,41 @@ class Homescreen extends StatelessWidget {
               children: [
                 ValueListenableBuilder(
                   valueListenable: Hive.box<DrawingNote>(
-                    'notes_box',
+                    'drawing_notes_box',
                   ).listenable(),
                   builder: (context, Box<DrawingNote> box, _) {
                     if (box.values.isEmpty) {
                       return Center(child: Text("No notes saved yet!"));
                     }
+                    final allNotes = box.values.toList();
+                    final collections = allNotes
+                        .map((note) => note.collection)
+                        .toSet()
+                        .toList();
 
                     return ListView.builder(
-                      itemCount: box.values.length,
+                      itemCount: collections.length,
                       itemBuilder: (context, index) {
-                        var note = box.getAt(index);
+                        final collection = collections[index];
 
-                        return ListTile(
-                          title: Text(note!.title),
-                          subtitle: Text(note.date.toString().substring(0, 16)),
-                          leading: Icon(Icons.note),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => note
-                                .delete(), // HiveObject නිසා කෙලින්ම මකන්න පුළුවන්
+                        return Card(
+                          elevation: 2,
+                          margin: EdgeInsets.all(8),
+                          child: ListTile(
+                            leading: Icon(Icons.folder),
+                            title: Text(collection),
+                            trailing: Icon(Icons.abc_rounded),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CollectionDrawings(
+                                    collectionName: collection,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Drawingscreen(note: note),
-                              ),
-                            );
-                          },
                         );
                       },
                     );
@@ -123,8 +130,6 @@ class Homescreen extends StatelessWidget {
                 ),
               ],
             ),
-            //3rd tab
-            const Center(child: Text("pdfs")),
           ],
         ),
 

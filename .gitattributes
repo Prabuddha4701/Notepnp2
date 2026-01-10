@@ -1,0 +1,5 @@
+# Ignore generated files for language stats
+web/* linguist-generated
+android/* linguist-generated
+ios/* linguist-generated
+build/* linguist-generated
